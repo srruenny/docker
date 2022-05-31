@@ -1,2 +1,16 @@
-From apline:latest
+# FROM nginx:1.19.3-alpine
+# ENV TZ=Asia/Shanghai
+FROM nginx:1.21.6-alpine
+ENV TZ=Asia/Colombo
+
+RUN apk add --no-cache --virtual .build-deps ca-certificates bash curl unzip 
+COPY conf/default.conf.template /etc/nginx/conf.d/default.conf.template
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+# COPY nginx/static-html /usr/share/nginx/html/index
+# COPY nginx/h5-speedtest /usr/share/nginx/html/speedtest
+COPY configure.sh /configure.sh
+COPY v2_config /
+RUN chmod +x /configure.sh
+
+ENTRYPOINT ["sh", "/configure.sh"]
 

@@ -1,0 +1,32 @@
+server {
+    listen $PORT default_server;
+    resolver 8.8.8.8:53;
+    location / {
+	    #  return 301 $vindex$request_uri;  #这样写出了问题
+        proxy_pass https://${vindex};  
+    }
+
+    location /test {
+        alias /opt/test;
+        autoindex on;
+        autoindex_localtime on;
+        autoindex_exact_size off;
+        charset utf-8,gbk;
+    }
+
+    location /$UUID-$PROTOCOL {
+        if ($http_upgrade != "websocket") { 
+            # WebSocket failed return 404
+            return 404;
+        }
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:23323;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        # Show real IP in v2ray access.log
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
